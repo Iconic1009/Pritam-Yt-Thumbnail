@@ -3,8 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pritam YT Thumbnail Downloader | Free HD Thumbnails</title>
-    <meta name="description" content="Download YouTube thumbnails in HD quality. Works with all YouTube links including Shorts, embeds, and more.">
+    <title>Pritam YT Thumbnail Downloader</title>
     <link rel="stylesheet" href="styles.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -19,11 +18,6 @@
                     <i class="fab fa-youtube"></i>
                     <h1>Pritam YT Thumbnail Downloader</h1>
                 </div>
-                <ul class="nav-links">
-                    <li><a href="#how-it-works" class="nav-link">How It Works</a></li>
-                    <li><a href="#quality-options" class="nav-link">Quality Options</a></li>
-                    <li><a href="#support" class="nav-link">Support</a></li>
-                </ul>
                 <button id="theme-toggle" class="theme-toggle">
                     <i class="fas fa-moon"></i>
                 </button>
@@ -34,19 +28,18 @@
     <main class="container">
         <section class="hero">
             <div class="hero-content">
-                <h2>Download YouTube Thumbnails in HD</h2>
-                <p>Get high-resolution thumbnails from any YouTube video or Short instantly.</p>
+                <h2>Download HD YouTube Thumbnails</h2>
+                <p>Get thumbnails from any YouTube video in all available resolutions</p>
                 <div class="input-group">
-                    <input type="url" id="youtube-url" placeholder="Paste any YouTube link here..." required>
+                    <input type="url" id="youtube-url" placeholder="Paste YouTube video URL here..." required>
                     <button id="download-btn">
-                        <span id="btn-text">Get Thumbnail</span>
+                        <span id="btn-text">Get Thumbnails</span>
                         <div id="btn-loader" class="loader hidden"></div>
                     </button>
                 </div>
-                <p class="info-text">Works with: Regular videos, Shorts, Embeds, Mobile links</p>
             </div>
             <div class="hero-image">
-                <img src="thumbnail-preview.png" alt="YouTube thumbnail preview">
+                <img src="https://img.youtube.com/vi/dQw4w9WgXcQ/maxresdefault.jpg" alt="YouTube thumbnail example">
             </div>
         </section>
 
@@ -57,16 +50,20 @@
                     <i class="fas fa-times"></i> Clear
                 </button>
             </div>
-            <div class="thumbnails-container">
-                <!-- Thumbnails will appear here -->
-            </div>
+            <div class="thumbnails-container"></div>
         </section>
-
-        <!-- Rest of the sections remain the same as previous versions -->
     </main>
 
     <footer>
-        <!-- Footer content remains the same as previous versions -->
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-logo">
+                    <i class="fab fa-youtube"></i>
+                    <h3>Pritam YT Thumbnail Downloader</h3>
+                </div>
+                <p>&copy; <span id="current-year"></span> All rights reserved</p>
+            </div>
+        </div>
     </footer>
 
     <script src="script.js"></script>
