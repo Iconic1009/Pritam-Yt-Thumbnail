@@ -2,6 +2,38 @@ document.addEventListener('DOMContentLoaded', function() {
     // Set current year in footer
     document.getElementById('current-year').textContent = new Date().getFullYear();
 
+    // Theme toggle functionality
+    const themeToggle = document.getElementById('theme-toggle');
+    const prefersDarkScheme = window.matchMedia('(prefers-color-scheme: dark)');
+    
+    // Check for saved theme preference or use system preference
+    const currentTheme = localStorage.getItem('theme') || 
+                         (prefersDarkScheme.matches ? 'dark' : 'light');
+    
+    // Apply the current theme
+    if (currentTheme === 'dark') {
+        document.body.setAttribute('data-theme', 'dark');
+        themeToggle.innerHTML = '<i class="fas fa-sun"></i>';
+    } else {
+        document.body.removeAttribute('data-theme');
+        themeToggle.innerHTML = '<i class="fas fa-moon"></i>';
+    }
+
+    // Theme toggle button click handler
+    themeToggle.addEventListener('click', function() {
+        let theme;
+        if (document.body.hasAttribute('data-theme')) {
+            document.body.removeAttribute('data-theme');
+            themeToggle.innerHTML = '<i class="fas fa-moon"></i>';
+            theme = 'light';
+        } else {
+            document.body.setAttribute('data-theme', 'dark');
+            themeToggle.innerHTML = '<i class="fas fa-sun"></i>';
+            theme = 'dark';
+        }
+        localStorage.setItem('theme', theme);
+    });
+
     // Toggle FAQ answers
     const faqQuestions = document.querySelectorAll('.faq-question');
     faqQuestions.forEach(question => {
@@ -132,3 +164,4 @@ document.addEventListener('DOMContentLoaded', function() {
             });
     }
 });
+                    
