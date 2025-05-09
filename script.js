@@ -10,7 +10,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const currentTheme = localStorage.getItem('theme') || 
                          (prefersDarkScheme.matches ? 'dark' : 'light');
     
-    // Apply the current theme
+    // Apply the initial theme
     if (currentTheme === 'dark') {
         document.body.setAttribute('data-theme', 'dark');
         themeToggle.innerHTML = '<i class="fas fa-sun"></i>';
@@ -29,145 +29,124 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // YouTube thumbnail downloader functionality
+    // Thumbnail downloader functionality
     const downloadBtn = document.getElementById('download-btn');
     const youtubeUrlInput = document.getElementById('youtube-url');
     const resultsSection = document.getElementById('results');
     const btnText = document.getElementById('btn-text');
     const btnLoader = document.getElementById('btn-loader');
     const clearResultsBtn = document.getElementById('clear-results');
+    const thumbnailsContainer = document.querySelector('.thumbnails-container');
 
     // Clear results button
-    clearResultsBtn.addEventListener('click', () => {
+    clearResultsBtn.addEventListener('click', function() {
         resultsSection.classList.add('hidden');
-        document.querySelector('.thumbnails-container').innerHTML = '';
+        thumbnailsContainer.innerHTML = '';
+        youtubeUrlInput.value = '';
+        youtubeUrlInput.focus();
     });
 
-    // Handle form submission
-    downloadBtn.addEventListener('click', getThumbnail);
+    // Handle thumbnail download
+    downloadBtn.addEventListener('click', getThumbnails);
     youtubeUrlInput.addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') getThumbnail();
+        if (e.key === 'Enter') {
+            getThumbnails();
+        }
     });
 
-    async function getThumbnail() {
+    async function getThumbnails() {
         const youtubeUrl = youtubeUrlInput.value.trim();
         
         if (!youtubeUrl) {
-            showError('Please enter a YouTube URL');
+            alert('Please enter a YouTube video URL');
             return;
         }
 
         // Show loading state
         youtubeUrlInput.disabled = true;
+        downloadBtn.disabled = true;
         btnText.textContent = 'Processing...';
         btnLoader.classList.remove('hidden');
-        downloadBtn.disabled = true;
 
         try {
             const videoId = extractVideoId(youtubeUrl);
             if (!videoId) {
-                throw new Error('Invalid YouTube URL');
+                throw new Error('Invalid YouTube URL. Please try again with a valid URL.');
             }
 
-            const thumbnails = await generateThumbnailUrls(videoId);
+            const thumbnails = {
+                'Max Resolution': `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`,
+                'High Quality': `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`,
+                'Medium Quality': `https://img.youtube.com/vi/${videoId}/mqdefault.jpg`,
+                'Standard Quality': `https://img.youtube.com/vi/${videoId}/sddefault.jpg`,
+                'Default': `https://img.youtube.com/vi/${videoId}/0.jpg`
+            };
+
             displayThumbnails(videoId, thumbnails);
-            
-            // Clear input after successful fetch
             youtubeUrlInput.value = '';
         } catch (error) {
-            showError(error.message);
+            alert(error.message);
         } finally {
             // Reset button state
             youtubeUrlInput.disabled = false;
-            btnText.textContent = 'Get Thumbnail';
-            btnLoader.classList.add('hidden');
             downloadBtn.disabled = false;
+            btnText.textContent = 'Get Thumbnails';
+            btnLoader.classList.add('hidden');
             youtubeUrlInput.focus();
         }
     }
 
     function extractVideoId(url) {
-        // Standard YouTube URLs
+        // Regular YouTube patterns
         const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=|shorts\/)([^#&?]*).*/;
         const match = url.match(regExp);
         
-        // YouTube Shorts
-        const shortsRegex = /youtube\.com\/shorts\/([^#&?\/]*)/;
+        // YouTube Shorts pattern
+        const shortsRegex = /youtube\.com\/shorts\/([^#&?]*)/;
         const shortsMatch = url.match(shortsRegex);
         
-        // YouTube Music
-        const musicRegex = /music\.youtube\.com\/watch\?v=([^#&?]*)/;
-        const musicMatch = url.match(musicRegex);
-
-        // Mobile URLs
-        const mobileRegex = /m\.youtube\.com\/watch\?v=([^#&?]*)/;
-        const mobileMatch = url.match(mobileRegex);
-
-        // Embed URLs
-        const embedRegex = /youtube\.com\/embed\/([^#&?]*)/;
-        const embedMatch = url.match(embedRegex);
-
         return (match && match[2].length === 11) ? match[2] :
                (shortsMatch && shortsMatch[1].length === 11) ? shortsMatch[1] :
-               musicMatch ? musicMatch[1] :
-               mobileMatch ? mobileMatch[1] :
-               embedMatch ? embedMatch[1] : null;
-    }
-
-    async function generateThumbnailUrls(videoId) {
-        // All possible thumbnail variations
-        const thumbnails = {
-            maxres: `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`,
-            hq: `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`,
-            mq: `https://img.youtube.com/vi/${videoId}/mqdefault.jpg`,
-            sd: `https://img.youtube.com/vi/${videoId}/sddefault.jpg`,
-            default: `https://img.youtube.com/vi/${videoId}/0.jpg`
-        };
-
-        // Return with fallback URLs in case some thumbnails don't exist
-        return {
-            'Maximum Resolution (HD)': thumbnails.maxres,
-            'High Quality (480p)': thumbnails.hq,
-            'Medium Quality (360p)': thumbnails.mq,
-            'Standard Quality': thumbnails.sd || thumbnails.default
-        };
+               null;
     }
 
     function displayThumbnails(videoId, thumbnails) {
-        const container = document.querySelector('.thumbnails-container');
-        container.innerHTML = '';
-
+        thumbnailsContainer.innerHTML = '';
+        
         for (const [quality, url] of Object.entries(thumbnails)) {
             const thumbnailBox = document.createElement('div');
             thumbnailBox.className = 'thumbnail-box';
             
             thumbnailBox.innerHTML = `
-                <img src="${url}" alt="${quality} thumbnail" onerror="this.onerror=null;this.src='${thumbnails['High Quality (480p)']}'">
-                <div class="quality-info">
+                <img src="${url}" alt="${quality} thumbnail" onerror="this.onerror=null;this.src='${thumbnails['High Quality']}'">
+                <div class="thumbnail-info">
                     <h3>${quality}</h3>
-                    <button class="download-thumbnail" data-url="${url}" data-filename="thumbnail-${videoId}-${quality.toLowerCase().replace(/\s+/g, '-')}.jpg">
+                    <button class="download-btn" 
+                            data-url="${url}" 
+                            data-filename="youtube-thumbnail-${videoId}-${quality.toLowerCase().replace(/\s+/g, '-')}.jpg">
                         Download
                     </button>
                 </div>
             `;
             
-            container.appendChild(thumbnailBox);
+            thumbnailsContainer.appendChild(thumbnailBox);
         }
-
+        
         // Set up download buttons
-        document.querySelectorAll('.download-thumbnail').forEach(btn => {
+        document.querySelectorAll('.download-btn').forEach(btn => {
             btn.addEventListener('click', function() {
                 const url = this.getAttribute('data-url');
                 const filename = this.getAttribute('data-filename');
                 downloadImage(url, filename);
             });
         });
-
+        
         resultsSection.classList.remove('hidden');
         resultsSection.scrollIntoView({ behavior: 'smooth' });
     }
 
     function downloadImage(url, filename) {
+        // Try fetching first for better error handling
         fetch(url)
             .then(response => response.blob())
             .then(blob => {
@@ -181,7 +160,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 document.body.removeChild(a);
             })
             .catch(() => {
-                // Fallback method for CORS issues
+                // Fallback for CORS issues
                 const a = document.createElement('a');
                 a.href = url;
                 a.download = filename;
@@ -191,9 +170,4 @@ document.addEventListener('DOMContentLoaded', function() {
                 document.body.removeChild(a);
             });
     }
-
-    function showError(message) {
-        alert(message);
-    }
 });
-    
