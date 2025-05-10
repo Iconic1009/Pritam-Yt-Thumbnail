@@ -3,215 +3,459 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pritam YT Thumbnail Downloader | Get High-Quality YouTube Thumbnails</title>
-    <meta name="description" content="Download YouTube thumbnails in HD quality for any video. Fast, free, and easy to use.">
-    <link rel="stylesheet" href="styles.css">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <title>Pritam YT Thumbnail Downloader</title>
+    <style>
+        :root {
+            --primary-color: #4285f4;
+            --secondary-color: #34a853;
+            --text-color: #333;
+            --bg-color: #f9f9f9;
+            --card-color: #fff;
+            --input-bg: #fff;
+            --border-color: #ddd;
+            --shadow-color: rgba(0, 0, 0, 0.1);
+        }
+
+        [data-theme="dark"] {
+            --primary-color: #8ab4f8;
+            --secondary-color: #81c995;
+            --text-color: #f1f1f1;
+            --bg-color: #121212;
+            --card-color: #1e1e1e;
+            --input-bg: #2d2d2d;
+            --border-color: #444;
+            --shadow-color: rgba(0, 0, 0, 0.3);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            transition: background-color 0.3s, color 0.3s, border-color 0.3s;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            position: relative;
+        }
+
+        h1 {
+            color: var(--primary-color);
+            margin-bottom: 10px;
+            font-size: 2.2rem;
+        }
+
+        .subtitle {
+            color: var(--text-color);
+            opacity: 0.8;
+            font-size: 1rem;
+        }
+
+        .theme-toggle {
+            position: absolute;
+            top: 0;
+            right: 0;
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--text-color);
+            font-size: 1.5rem;
+            padding: 5px;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .theme-toggle:hover {
+            background-color: rgba(0, 0, 0, 0.1);
+        }
+
+        [data-theme="dark"] .theme-toggle:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .input-container {
+            background-color: var(--card-color);
+            border-radius: 10px;
+            padding: 25px;
+            box-shadow: 0 4px 15px var(--shadow-color);
+            margin-bottom: 30px;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .input-container:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px var(--shadow-color);
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        label {
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--text-color);
+        }
+
+        .url-input {
+            display: flex;
+            gap: 10px;
+        }
+
+        input[type="text"] {
+            flex: 1;
+            padding: 12px 15px;
+            border: 1px solid var(--border-color);
+            border-radius: 5px;
+            font-size: 1rem;
+            background-color: var(--input-bg);
+            color: var(--text-color);
+        }
+
+        input[type="text"]:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(66, 133, 244, 0.2);
+        }
+
+        button {
+            padding: 12px 20px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 500;
+            transition: background-color 0.2s, transform 0.2s;
+        }
+
+        button:hover {
+            background-color: #3367d6;
+            transform: translateY(-1px);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .result-container {
+            background-color: var(--card-color);
+            border-radius: 10px;
+            padding: 25px;
+            box-shadow: 0 4px 15px var(--shadow-color);
+            margin-bottom: 30px;
+            opacity: 0;
+            height: 0;
+            overflow: hidden;
+            transition: opacity 0.5s ease, height 0.5s ease, padding 0.5s ease;
+        }
+
+        .result-container.show {
+            opacity: 1;
+            height: auto;
+            padding: 25px;
+        }
+
+        .thumbnail-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .thumbnail-preview {
+            max-width: 100%;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px var(--shadow-color);
+            transition: transform 0.3s;
+        }
+
+        .thumbnail-preview:hover {
+            transform: scale(1.02);
+        }
+
+        .download-options {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            width: 100%;
+        }
+
+        .download-btn {
+            background-color: var(--secondary-color);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .download-btn:hover {
+            background-color: #2d9246;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .spinner {
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            border-radius: 50%;
+            border-top: 4px solid var(--primary-color);
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        footer {
+            margin-top: auto;
+            text-align: center;
+            padding: 20px;
+            color: var(--text-color);
+            opacity: 0.7;
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 600px) {
+            .url-input {
+                flex-direction: column;
+            }
+            
+            button {
+                width: 100%;
+            }
+            
+            .download-options {
+                flex-direction: column;
+            }
+            
+            .download-btn {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+    </style>
 </head>
 <body>
-    <header>
-        <div class="container">
-            <nav>
-                <div class="logo">
-                    <i class="fab fa-youtube"></i>
-                    <h1>Pritam YT Thumbnail Downloader</h1>
+    <div class="container">
+        <header>
+            <h1>Pritam YT Thumbnail Downloader</h1>
+            <p class="subtitle">Download high-quality thumbnails from any YouTube video</p>
+            <button class="theme-toggle" id="themeToggle">🌓</button>
+        </header>
+
+        <div class="input-container">
+            <div class="input-group">
+                <label for="youtubeUrl">YouTube Video URL</label>
+                <div class="url-input">
+                    <input type="text" id="youtubeUrl" placeholder="https://www.youtube.com/watch?v=..." autocomplete="off">
+                    <button id="fetchBtn">Fetch Thumbnail</button>
                 </div>
-                <ul class="nav-links">
-                    <li><a href="#how-it-works" class="nav-link">How It Works</a></li>
-                    <li><a href="#quality-options" class="nav-link">Quality Options</a></li>
-                    <li><a href="#support" class="nav-link">Support</a></li>
-                </ul>
-                <button id="theme-toggle" class="theme-toggle">
-                    <i class="fas fa-moon"></i>
-                </button>
-            </nav>
+            </div>
         </div>
-    </header>
 
-    <main class="container">
-        <section class="hero">
-            <div class="hero-content">
-                <h2>Download YouTube Thumbnails in HD Quality</h2>
-                <p>Get high-resolution thumbnails from any YouTube video instantly. No registration required.</p>
-                <div class="input-group">
-                    <input type="url" id="youtube-url" placeholder="Paste YouTube video URL here..." required>
-                    <button id="download-btn">Get Thumbnail</button>
-                </div>
-            </div>
-            <div class="hero-image">
-                <img src="thumbnail-preview.png" alt="YouTube thumbnail preview example">
-            </div>
-        </section>
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p>Fetching thumbnail...</p>
+        </div>
 
-        <section id="results" class="results-section hidden">
-            <h2>Select Thumbnail Quality</h2>
-            <div class="thumbnails-container">
-                <div class="thumbnail-box">
-                    <img id="maxres" src="" alt="Maximum resolution thumbnail">
-                    <div class="quality-info">
-                        <h3>Max Resolution</h3>
-                        <p>1280×720 or higher</p>
-                        <button class="download-thumbnail" data-quality="maxres">Download</button>
-                    </div>
-                </div>
-                <div class="thumbnail-box">
-                    <img id="hq" src="" alt="High quality thumbnail">
-                    <div class="quality-info">
-                        <h3>High Quality</h3>
-                        <p>480×360</p>
-                        <button class="download-thumbnail" data-quality="hq">Download</button>
-                    </div>
-                </div>
-                <div class="thumbnail-box">
-                    <img id="mq" src="" alt="Medium quality thumbnail">
-                    <div class="quality-info">
-                        <h3>Medium Quality</h3>
-                        <p>320×180</p>
-                        <button class="download-thumbnail" data-quality="mq">Download</button>
-                    </div>
-                </div>
-                <div class="thumbnail-box">
-                    <img id="sd" src="" alt="Standard quality thumbnail">
-                    <div class="quality-info">
-                        <h3>Standard Quality</h3>
-                        <p>120×90</p>
-                        <button class="download-thumbnail" data-quality="sd">Download</button>
-                    </div>
+        <div class="result-container" id="resultContainer">
+            <div class="thumbnail-container">
+                <img id="thumbnailPreview" class="thumbnail-preview" src="" alt="YouTube Thumbnail">
+                <div class="download-options">
+                    <button class="download-btn" data-quality="maxres">
+                        <span>Download Max Resolution</span>
+                    </button>
+                    <button class="download-btn" data-quality="hq">
+                        <span>Download High Quality</span>
+                    </button>
+                    <button class="download-btn" data-quality="mq">
+                        <span>Download Medium Quality</span>
+                    </button>
+                    <button class="download-btn" data-quality="sd">
+                        <span>Download Standard Quality</span>
+                    </button>
                 </div>
             </div>
-        </section>
-
-        <section id="how-it-works" class="how-it-works">
-            <h2>How It Works</h2>
-            <div class="steps">
-                <div class="step">
-                    <div class="step-number">1</div>
-                    <h3>Paste URL</h3>
-                    <p>Copy the YouTube video URL from your browser's address bar and paste it above.</p>
-                </div>
-                <div class="step">
-                    <div class="step-number">2</div>
-                    <h3>Click "Get Thumbnail"</h3>
-                    <p>Our system will extract the thumbnail images from YouTube's servers.</p>
-                </div>
-                <div class="step">
-                    <div class="step-number">3</div>
-                    <h3>Download</h3>
-                    <p>Choose your preferred quality and click the download button.</p>
-                </div>
-            </div>
-        </section>
-
-        <section id="quality-options" class="quality-options">
-            <h2>Available Quality Options</h2>
-            <div class="quality-grid">
-                <div class="quality-card">
-                    <div class="quality-icon">
-                        <i class="fas fa-image"></i>
-                    </div>
-                    <h3>Maximum Resolution</h3>
-                    <p>Highest quality available (1280×720 or more)</p>
-                </div>
-                <div class="quality-card">
-                    <div class="quality-icon">
-                        <i class="fas fa-highlighter"></i>
-                    </div>
-                    <h3>High Quality</h3>
-                    <p>480×360 resolution for good balance</p>
-                </div>
-                <div class="quality-card">
-                    <div class="quality-icon">
-                        <i class="fas fa-mobile-alt"></i>
-                    </div>
-                    <h3>Medium Quality</h3>
-                    <p>320×180 resolution for mobile</p>
-                </div>
-                <div class="quality-card">
-                    <div class="quality-icon">
-                        <i class="fas fa-file-image"></i>
-                    </div>
-                    <h3>Standard Quality</h3>
-                    <p>120×90 resolution for quick previews</p>
-                </div>
-            </div>
-        </section>
-
-        <section id="support" class="support">
-            <h2>Need Help?</h2>
-            <div class="support-content">
-                <div class="support-card">
-                    <h3><i class="fas fa-question-circle"></i> Frequently Asked Questions</h3>
-                    <div class="faq">
-                        <div class="faq-item">
-                            <button class="faq-question">How to copy a YouTube video URL?<i class="fas fa-chevron-down"></i></button>
-                            <div class="faq-answer">
-                                <p>Simply go to the YouTube video you want, and copy the URL from your browser's address bar. Then paste it in our input field above.</p>
-                            </div>
-                        </div>
-                        <div class="faq-item">
-                            <button class="faq-question">Is this service free?<i class="fas fa-chevron-down"></i></button>
-                            <div class="faq-answer">
-                                <p>Yes, our YouTube thumbnail downloader is completely free to use with no hidden charges.</p>
-                            </div>
-                        </div>
-                        <div class="faq-item">
-                            <button class="faq-question">Can I use these thumbnails for my blog?<i class="fas fa-chevron-down"></i></button>
-                            <div class="faq-answer">
-                                <p>Yes, you can use them as thumbnails for your content. However, always respect copyright laws and YouTube's terms of service.</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="support-card">
-                    <h3><i class="fas fa-envelope"></i> Contact Us</h3>
-                    <p>Having trouble with our service or have suggestions for improvement? We'd love to hear from you.</p>
-                    <form class="contact-form">
-                        <input type="text" placeholder="Your Name">
-                        <input type="email" placeholder="Your Email">
-                        <textarea placeholder="Your Message"></textarea>
-                        <button type="submit">Send Message</button>
-                    </form>
-                </div>
-            </div>
-        </section>
-    </main>
+        </div>
+    </div>
 
     <footer>
-        <div class="container">
-            <div class="footer-content">
-                <div class="footer-logo">
-                    <i class="fab fa-youtube"></i>
-                    <h3>Pritam YT Thumbnail Downloader</h3>
-                </div>
-                <div class="footer-links">
-                    <ul>
-                        <li><a href="#">Home</a></li>
-                        <li><a href="#how-it-works">How It Works</a></li>
-                        <li><a href="#quality-options">Quality Options</a></li>
-                        <li><a href="#support">Support</a></li>
-                    </ul>
-                </div>
-                <div class="footer-social">
-                    <a href="#"><i class="fab fa-twitter"></i></a>
-                    <a href="#"><i class="fab fa-facebook"></i></a>
-                    <a href="#"><i class="fab fa-instagram"></i></a>
-                    <a href="#"><i class="fab fa-github"></i></a>
-                </div>
-            </div>
-            <div class="footer-bottom">
-                <p>&copy; <span id="current-year"></span> Pritam YT Thumbnail Downloader. All rights reserved.</p>
-                <div class="legal-links">
-                    <a href="#">Privacy Policy</a>
-                    <a href="#">Terms of Service</a>
-                    <a href="#">DMCA</a>
-                </div>
-            </div>
-        </div>
+        <p>© 2023 Pritam YT Thumbnail Downloader. All rights reserved.</p>
     </footer>
 
-    <script src="script.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Theme toggle functionality
+            const themeToggle = document.getElementById('themeToggle');
+            const body = document.body;
+            
+            // Check for saved theme preference or use preferred color scheme
+            const savedTheme = localStorage.getItem('theme');
+            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            
+            if (savedTheme) {
+                body.setAttribute('data-theme', savedTheme);
+                themeToggle.textContent = savedTheme === 'dark' ? '🌞' : '🌓';
+            } else if (prefersDark) {
+                body.setAttribute('data-theme', 'dark');
+                themeToggle.textContent = '🌞';
+            }
+            
+            themeToggle.addEventListener('click', () => {
+                const currentTheme = body.getAttribute('data-theme');
+                const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+                body.setAttribute('data-theme', newTheme);
+                themeToggle.textContent = newTheme === 'dark' ? '🌞' : '🌓';
+                localStorage.setItem('theme', newTheme);
+            });
+
+            // Thumbnail downloader functionality
+            const fetchBtn = document.getElementById('fetchBtn');
+            const youtubeUrlInput = document.getElementById('youtubeUrl');
+            const loading = document.getElementById('loading');
+            const resultContainer = document.getElementById('resultContainer');
+            const thumbnailPreview = document.getElementById('thumbnailPreview');
+            const downloadBtns = document.querySelectorAll('.download-btn');
+
+            fetchBtn.addEventListener('click', fetchThumbnail);
+            youtubeUrlInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    fetchThumbnail();
+                }
+            });
+
+            function fetchThumbnail() {
+                const url = youtubeUrlInput.value.trim();
+                
+                if (!url) {
+                    alert('Please enter a YouTube URL');
+                    return;
+                }
+                
+                // Show loading state
+                loading.style.display = 'block';
+                resultContainer.classList.remove('show');
+                
+                // Extract video ID from various YouTube URL formats
+                let videoId = '';
+                
+                // Regular URL formats
+                const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
+                const match = url.match(regExp);
+                
+                if (match && match[2].length === 11) {
+                    videoId = match[2];
+                } 
+                // Short URL format
+                else if (url.includes('youtu.be/')) {
+                    videoId = url.split('youtu.be/')[1].split(/[?&#]/)[0];
+                }
+                // Channel URL with video ID
+                else if (url.includes('youtube.com/watch')) {
+                    const urlParams = new URLSearchParams(url.split('?')[1]);
+                    videoId = urlParams.get('v');
+                }
+                // Embedded URL
+                else if (url.includes('youtube.com/embed/')) {
+                    videoId = url.split('youtube.com/embed/')[1].split(/[?&#]/)[0];
+                }
+                
+                if (!videoId) {
+                    loading.style.display = 'none';
+                    alert('Invalid YouTube URL. Please check and try again.');
+                    return;
+                }
+                
+                // Generate thumbnail URLs
+                const thumbnails = {
+                    maxres: `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`,
+                    hq: `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`,
+                    mq: `https://img.youtube.com/vi/${videoId}/mqdefault.jpg`,
+                    sd: `https://img.youtube.com/vi/${videoId}/sddefault.jpg`
+                };
+                
+                // Check if maxres thumbnail exists
+                checkThumbnailExists(thumbnails.maxres).then(exists => {
+                    if (!exists) {
+                        thumbnails.maxres = thumbnails.hq;
+                    }
+                    
+                    // Set the preview image
+                    thumbnailPreview.src = thumbnails.maxres;
+                    
+                    // Set download buttons data
+                    downloadBtns.forEach(btn => {
+                        const quality = btn.getAttribute('data-quality');
+                        btn.onclick = () => downloadThumbnail(thumbnails[quality], quality);
+                    });
+                    
+                    // Hide loading and show result with animation
+                    loading.style.display = 'none';
+                    setTimeout(() => {
+                        resultContainer.classList.add('show');
+                        // Smooth scroll to result
+                        resultContainer.scrollIntoView({ behavior: 'smooth' });
+                        // Clear input with animation
+                        youtubeUrlInput.value = '';
+                    }, 100);
+                });
+            }
+            
+            function checkThumbnailExists(url) {
+                return new Promise(resolve => {
+                    const img = new Image();
+                    img.onload = function() {
+                        resolve(true);
+                    };
+                    img.onerror = function() {
+                        resolve(false);
+                    };
+                    img.src = url;
+                });
+            }
+            
+            function downloadThumbnail(url, quality) {
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `youtube-thumbnail-${quality}.jpg`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+            }
+        });
+    </script>
 </body>
 </html>
