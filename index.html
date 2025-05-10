@@ -636,4 +636,126 @@
                         { 
                             id: 'hq', 
                             name: 'High Quality', 
-                  
+                            url: `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`, 
+                            width: 480, 
+                            height: 360,
+                            icon: '🌅'
+                        },
+                        { 
+                            id: 'mq', 
+                            name: 'Medium Quality', 
+                            url: `https://img.youtube.com/vi/${videoId}/mqdefault.jpg`, 
+                            width: 320, 
+                            height: 180,
+                            icon: '🏞️'
+                        },
+                        { 
+                            id: 'default', 
+                            name: 'Default Quality', 
+                            url: `https://img.youtube.com/vi/${videoId}/default.jpg`, 
+                            width: 120, 
+                            height: 90,
+                            icon: '📷'
+                        }
+                    ];
+                    
+                    // Check availability of each thumbnail and create cards
+                    for (const quality of thumbnailQualities) {
+                        const exists = await checkThumbnailExists(quality.url);
+                        createThumbnailCard(quality, exists, videoId);
+                    }
+
+                    // Hide loading and show results
+                    loading.style.display = 'none';
+                    resultContainer.classList.add('show');
+                    
+                    // Clear input field with animation
+                    setTimeout(() => {
+                        youtubeUrlInput.value = '';
+                        resultContainer.scrollIntoView({ behavior: 'smooth' });
+                    }, 300);
+
+                    showToast('Thumbnails fetched successfully!');
+                    
+                } catch (error) {
+                    console.error('Error:', error);
+                    loading.style.display = 'none';
+                    showToast(error.message || 'Failed to fetch thumbnails', false);
+                }
+            }
+            
+            function createThumbnailCard(quality, exists, videoId) {
+                const card = document.createElement('div');
+                card.className = 'thumbnail-card';
+                
+                card.innerHTML = `
+                    <div class="thumbnail-img-container">
+                        <img class="thumbnail-img" src="${exists ? quality.url : 'https://via.placeholder.com/320x180?text=Thumbnail+Not+Available'}" alt="${quality.name} Thumbnail">
+                    </div>
+                    <div class="thumbnail-info">
+                        <div class="thumbnail-quality">
+                            <span class="quality-icon">${quality.icon}</span>
+                            ${quality.name}
+                        </div>
+                        <div class="thumbnail-dimensions">
+                            ${exists ? `${quality.width} × ${quality.height} pixels` : 'Not available'}
+                        </div>
+                        <div class="thumbnail-actions">
+                            ${exists ? 
+                                `<button class="thumbnail-download-btn" data-quality="${quality.id}">
+                                    <span>Download</span>
+                                </button>` : 
+                                `<button class="thumbnail-download-btn" disabled style="opacity: 0.6; cursor: not-allowed;">
+                                    <span>Unavailable</span>
+                                </button>`
+                            }
+                            <span class="thumbnail-status ${exists ? 'status-available' : 'status-unavailable'}">
+                                ${exists ? 'Available' : 'Unavailable'}
+                            </span>
+                        </div>
+                    </div>
+                `;
+                
+                // Add click event for download button if available
+                if (exists) {
+                    const downloadBtn = card.querySelector('.thumbnail-download-btn');
+                    downloadBtn.addEventListener('click', () => {
+                        downloadThumbnail(quality.url, quality.id, videoId);
+                    });
+                }
+                
+                thumbnailsGrid.appendChild(card);
+            }
+            
+            function downloadThumbnail(url, quality, videoId) {
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `pritam-thumbnail-${quality}-${videoId}.jpg`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                
+                showToast(`Downloaded ${quality} thumbnail!`);
+            }
+            
+            function checkThumbnailExists(url) {
+                return new Promise(resolve => {
+                    const img = new Image();
+                    img.onload = function() {
+                        // Check if the image is not the default YouTube placeholder
+                        if (this.width > 120 || this.height > 90) {
+                            resolve(true);
+                        } else {
+                            resolve(false);
+                        }
+                    };
+                    img.onerror = function() {
+                        resolve(false);
+                    };
+                    img.src = url;
+                });
+            }
+        });
+    </script>
+</body>
+</html>
