@@ -14,6 +14,9 @@
             --input-bg: #fff;
             --border-color: #ddd;
             --shadow-color: rgba(0, 0, 0, 0.1);
+            --success-color: #34a853;
+            --error-color: #ea4335;
+            --warning-color: #fbbc05;
         }
 
         [data-theme="dark"] {
@@ -25,13 +28,16 @@
             --input-bg: #2d2d2d;
             --border-color: #444;
             --shadow-color: rgba(0, 0, 0, 0.3);
+            --success-color: #81c995;
+            --error-color: #f28b82;
+            --warning-color: #fdd663;
         }
 
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            transition: background-color 0.3s, color 0.3s, border-color 0.3s;
+            transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1), opacity 0.5s ease, box-shadow 0.3s ease;
         }
 
         body {
@@ -43,11 +49,12 @@
             flex-direction: column;
             align-items: center;
             padding: 20px;
+            overflow-x: hidden;
         }
 
         .container {
             width: 100%;
-            max-width: 800px;
+            max-width: 1100px;
             margin: 0 auto;
             padding: 20px;
         }
@@ -56,18 +63,45 @@
             text-align: center;
             margin-bottom: 30px;
             position: relative;
+            animation: fadeInDown 0.8s ease both;
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         h1 {
             color: var(--primary-color);
             margin-bottom: 10px;
-            font-size: 2.2rem;
+            font-size: 2.8rem;
+            background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            animation: gradient 8s ease infinite, fadeIn 1s ease both;
+            background-size: 200% 200%;
+            letter-spacing: -1px;
+        }
+
+        @keyframes gradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
         }
 
         .subtitle {
             color: var(--text-color);
             opacity: 0.8;
-            font-size: 1rem;
+            font-size: 1.2rem;
+            margin-bottom: 5px;
+            animation: fadeIn 1s ease 0.2s both;
         }
 
         .theme-toggle {
@@ -78,18 +112,21 @@
             border: none;
             cursor: pointer;
             color: var(--text-color);
-            font-size: 1.5rem;
+            font-size: 1.8rem;
             padding: 5px;
             border-radius: 50%;
-            width: 40px;
-            height: 40px;
+            width: 45px;
+            height: 45px;
             display: flex;
             align-items: center;
             justify-content: center;
+            transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+            animation: fadeIn 1s ease 0.4s both;
         }
 
         .theme-toggle:hover {
             background-color: rgba(0, 0, 0, 0.1);
+            transform: rotate(180deg) scale(1.1);
         }
 
         [data-theme="dark"] .theme-toggle:hover {
@@ -98,16 +135,28 @@
 
         .input-container {
             background-color: var(--card-color);
-            border-radius: 10px;
-            padding: 25px;
-            box-shadow: 0 4px 15px var(--shadow-color);
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 8px 25px var(--shadow-color);
             margin-bottom: 30px;
-            transition: transform 0.3s, box-shadow 0.3s;
+            transition: all 0.5s cubic-bezier(0.25, 0.8, 0.25, 1);
+            animation: fadeInUp 0.8s ease 0.3s both;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         .input-container:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px var(--shadow-color);
+            transform: translateY(-5px) scale(1.01);
+            box-shadow: 0 15px 35px var(--shadow-color);
         }
 
         .input-group {
@@ -116,122 +165,210 @@
         }
 
         label {
-            margin-bottom: 8px;
-            font-weight: 500;
+            margin-bottom: 12px;
+            font-weight: 600;
             color: var(--text-color);
+            font-size: 1.2rem;
         }
 
         .url-input {
             display: flex;
-            gap: 10px;
+            gap: 12px;
         }
 
         input[type="text"] {
             flex: 1;
-            padding: 12px 15px;
-            border: 1px solid var(--border-color);
-            border-radius: 5px;
-            font-size: 1rem;
+            padding: 16px 20px;
+            border: 2px solid var(--border-color);
+            border-radius: 10px;
+            font-size: 1.1rem;
             background-color: var(--input-bg);
             color: var(--text-color);
+            transition: all 0.4s ease;
         }
 
         input[type="text"]:focus {
             outline: none;
             border-color: var(--primary-color);
-            box-shadow: 0 0 0 2px rgba(66, 133, 244, 0.2);
+            box-shadow: 0 0 0 5px rgba(66, 133, 244, 0.2);
         }
 
         button {
-            padding: 12px 20px;
+            padding: 16px 28px;
             background-color: var(--primary-color);
             color: white;
             border: none;
-            border-radius: 5px;
+            border-radius: 10px;
             cursor: pointer;
-            font-size: 1rem;
-            font-weight: 500;
-            transition: background-color 0.2s, transform 0.2s;
+            font-size: 1.1rem;
+            font-weight: 600;
+            transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
         }
 
         button:hover {
             background-color: #3367d6;
-            transform: translateY(-1px);
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 8px 15px var(--shadow-color);
         }
 
         button:active {
-            transform: translateY(0);
+            transform: translateY(0) scale(1);
+            box-shadow: 0 4px 8px var(--shadow-color);
         }
 
         .result-container {
             background-color: var(--card-color);
-            border-radius: 10px;
-            padding: 25px;
-            box-shadow: 0 4px 15px var(--shadow-color);
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 8px 25px var(--shadow-color);
             margin-bottom: 30px;
             opacity: 0;
             height: 0;
             overflow: hidden;
-            transition: opacity 0.5s ease, height 0.5s ease, padding 0.5s ease;
+            transition: all 0.7s cubic-bezier(0.25, 0.8, 0.25, 1);
         }
 
         .result-container.show {
             opacity: 1;
             height: auto;
-            padding: 25px;
+            padding: 30px;
         }
 
-        .thumbnail-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 20px;
+        .thumbnails-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 30px;
+            margin-bottom: 20px;
         }
 
-        .thumbnail-preview {
-            max-width: 100%;
-            border-radius: 8px;
-            box-shadow: 0 4px 10px var(--shadow-color);
-            transition: transform 0.3s;
+        .thumbnail-card {
+            background-color: var(--card-color);
+            border-radius: 14px;
+            overflow: hidden;
+            box-shadow: 0 6px 18px var(--shadow-color);
+            transition: all 0.5s cubic-bezier(0.25, 0.8, 0.25, 1);
+            animation: cardEntrance 0.8s ease forwards;
+            opacity: 0;
+            transform: translateY(30px);
         }
 
-        .thumbnail-preview:hover {
-            transform: scale(1.02);
+        @keyframes cardEntrance {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
-        .download-options {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            justify-content: center;
+        .thumbnail-card:nth-child(1) { animation-delay: 0.1s; }
+        .thumbnail-card:nth-child(2) { animation-delay: 0.2s; }
+        .thumbnail-card:nth-child(3) { animation-delay: 0.3s; }
+        .thumbnail-card:nth-child(4) { animation-delay: 0.4s; }
+        .thumbnail-card:nth-child(5) { animation-delay: 0.5s; }
+
+        .thumbnail-card:hover {
+            transform: translateY(-10px) scale(1.02);
+            box-shadow: 0 18px 35px var(--shadow-color);
+        }
+
+        .thumbnail-img-container {
+            position: relative;
+            overflow: hidden;
+            padding-top: 56.25%; /* 16:9 aspect ratio */
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .thumbnail-img {
+            position: absolute;
+            top: 0;
+            left: 0;
             width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.8s ease;
         }
 
-        .download-btn {
-            background-color: var(--secondary-color);
+        .thumbnail-card:hover .thumbnail-img {
+            transform: scale(1.1);
+        }
+
+        .thumbnail-info {
+            padding: 20px;
+        }
+
+        .thumbnail-quality {
+            font-weight: 700;
+            margin-bottom: 10px;
+            color: var(--primary-color);
+            font-size: 1.2rem;
             display: flex;
             align-items: center;
             gap: 8px;
         }
 
-        .download-btn:hover {
+        .quality-icon {
+            font-size: 1.4rem;
+        }
+
+        .thumbnail-dimensions {
+            font-size: 0.95rem;
+            opacity: 0.8;
+            margin-bottom: 14px;
+        }
+
+        .thumbnail-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .thumbnail-download-btn {
+            background-color: var(--secondary-color);
+            padding: 12px 20px;
+            font-size: 1rem;
+            border-radius: 10px;
+            font-weight: 600;
+        }
+
+        .thumbnail-download-btn:hover {
             background-color: #2d9246;
+        }
+
+        .thumbnail-status {
+            font-size: 0.9rem;
+            padding: 6px 12px;
+            border-radius: 14px;
+            font-weight: 600;
+        }
+
+        .status-available {
+            background-color: rgba(52, 168, 83, 0.2);
+            color: var(--success-color);
+        }
+
+        .status-unavailable {
+            background-color: rgba(234, 67, 53, 0.2);
+            color: var(--error-color);
         }
 
         .loading {
             display: none;
             text-align: center;
-            margin: 20px 0;
+            margin: 40px 0;
+            animation: fadeIn 0.6s ease;
         }
 
         .spinner {
-            border: 4px solid rgba(0, 0, 0, 0.1);
+            border: 6px solid rgba(0, 0, 0, 0.1);
             border-radius: 50%;
-            border-top: 4px solid var(--primary-color);
-            width: 30px;
-            height: 30px;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 10px;
+            border-top: 6px solid var(--primary-color);
+            width: 60px;
+            height: 60px;
+            animation: spin 1.2s linear infinite;
+            margin: 0 auto 25px;
         }
 
         @keyframes spin {
@@ -239,31 +376,105 @@
             100% { transform: rotate(360deg); }
         }
 
+        .loading-text {
+            font-size: 1.3rem;
+            color: var(--text-color);
+            animation: pulse 1.6s ease infinite;
+            font-weight: 500;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.8; transform: scale(0.98); }
+            50% { opacity: 1; transform: scale(1.02); }
+        }
+
         footer {
             margin-top: auto;
             text-align: center;
-            padding: 20px;
+            padding: 25px;
             color: var(--text-color);
             opacity: 0.7;
-            font-size: 0.9rem;
+            font-size: 1rem;
+            animation: fadeIn 1.2s ease;
         }
 
-        @media (max-width: 600px) {
+        .toast {
+            position: fixed;
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%) translateY(120px);
+            background-color: var(--success-color);
+            color: white;
+            padding: 18px 28px;
+            border-radius: 10px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.25);
+            z-index: 1000;
+            opacity: 0;
+            transition: all 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 1.1rem;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        .toast.error {
+            background-color: var(--error-color);
+        }
+
+        .toast.warning {
+            background-color: var(--warning-color);
+        }
+
+        .toast-icon {
+            font-size: 1.4rem;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+            
+            h1 {
+                font-size: 2.2rem;
+            }
+            
+            .subtitle {
+                font-size: 1rem;
+            }
+            
             .url-input {
                 flex-direction: column;
             }
             
             button {
                 width: 100%;
+                padding: 14px;
             }
             
-            .download-options {
-                flex-direction: column;
+            .thumbnails-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
             }
             
-            .download-btn {
-                width: 100%;
-                justify-content: center;
+            .input-container {
+                padding: 20px;
+            }
+            
+            .thumbnail-card {
+                max-width: 400px;
+                margin: 0 auto;
+            }
+            
+            .toast {
+                width: 90%;
+                text-align: center;
+                padding: 15px;
             }
         }
     </style>
@@ -281,33 +492,21 @@
                 <label for="youtubeUrl">YouTube Video URL</label>
                 <div class="url-input">
                     <input type="text" id="youtubeUrl" placeholder="https://www.youtube.com/watch?v=..." autocomplete="off">
-                    <button id="fetchBtn">Fetch Thumbnail</button>
+                    <button id="fetchBtn">
+                        <span>Fetch Thumbnails</span>
+                    </button>
                 </div>
             </div>
         </div>
 
         <div class="loading" id="loading">
             <div class="spinner"></div>
-            <p>Fetching thumbnail...</p>
+            <p class="loading-text">Fetching thumbnails...</p>
         </div>
 
         <div class="result-container" id="resultContainer">
-            <div class="thumbnail-container">
-                <img id="thumbnailPreview" class="thumbnail-preview" src="" alt="YouTube Thumbnail">
-                <div class="download-options">
-                    <button class="download-btn" data-quality="maxres">
-                        <span>Download Max Resolution</span>
-                    </button>
-                    <button class="download-btn" data-quality="hq">
-                        <span>Download High Quality</span>
-                    </button>
-                    <button class="download-btn" data-quality="mq">
-                        <span>Download Medium Quality</span>
-                    </button>
-                    <button class="download-btn" data-quality="sd">
-                        <span>Download Standard Quality</span>
-                    </button>
-                </div>
+            <div class="thumbnails-grid" id="thumbnailsGrid">
+                <!-- Thumbnail cards will be inserted here -->
             </div>
         </div>
     </div>
@@ -315,6 +514,11 @@
     <footer>
         <p>© 2023 Pritam YT Thumbnail Downloader. All rights reserved.</p>
     </footer>
+
+    <div class="toast" id="toast">
+        <span class="toast-icon">✓</span>
+        <span class="toast-message"></span>
+    </div>
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
@@ -347,115 +551,89 @@
             const youtubeUrlInput = document.getElementById('youtubeUrl');
             const loading = document.getElementById('loading');
             const resultContainer = document.getElementById('resultContainer');
-            const thumbnailPreview = document.getElementById('thumbnailPreview');
-            const downloadBtns = document.querySelectorAll('.download-btn');
+            const thumbnailsGrid = document.getElementById('thumbnailsGrid');
+            const toast = document.getElementById('toast');
+            const toastMessage = toast.querySelector('.toast-message');
 
-            fetchBtn.addEventListener('click', fetchThumbnail);
+            fetchBtn.addEventListener('click', fetchThumbnails);
             youtubeUrlInput.addEventListener('keypress', function(e) {
                 if (e.key === 'Enter') {
-                    fetchThumbnail();
+                    fetchThumbnails();
                 }
             });
 
-            function fetchThumbnail() {
+            function showToast(message, isSuccess = true) {
+                toastMessage.textContent = message;
+                toast.className = isSuccess ? 'toast show' : 'toast show error';
+                toast.querySelector('.toast-icon').textContent = isSuccess ? '✓' : '✕';
+                
+                setTimeout(() => {
+                    toast.classList.remove('show');
+                }, 3000);
+            }
+
+            async function fetchThumbnails() {
                 const url = youtubeUrlInput.value.trim();
                 
                 if (!url) {
-                    alert('Please enter a YouTube URL');
+                    showToast('Please enter a YouTube URL', false);
+                    youtubeUrlInput.focus();
                     return;
                 }
                 
                 // Show loading state
                 loading.style.display = 'block';
                 resultContainer.classList.remove('show');
+                thumbnailsGrid.innerHTML = '';
                 
-                // Extract video ID from various YouTube URL formats
-                let videoId = '';
-                
-                // Regular URL formats
-                const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
-                const match = url.match(regExp);
-                
-                if (match && match[2].length === 11) {
-                    videoId = match[2];
-                } 
-                // Short URL format
-                else if (url.includes('youtu.be/')) {
-                    videoId = url.split('youtu.be/')[1].split(/[?&#]/)[0];
-                }
-                // Channel URL with video ID
-                else if (url.includes('youtube.com/watch')) {
-                    const urlParams = new URLSearchParams(url.split('?')[1]);
-                    videoId = urlParams.get('v');
-                }
-                // Embedded URL
-                else if (url.includes('youtube.com/embed/')) {
-                    videoId = url.split('youtube.com/embed/')[1].split(/[?&#]/)[0];
-                }
-                
-                if (!videoId) {
-                    loading.style.display = 'none';
-                    alert('Invalid YouTube URL. Please check and try again.');
-                    return;
-                }
-                
-                // Generate thumbnail URLs
-                const thumbnails = {
-                    maxres: `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`,
-                    hq: `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`,
-                    mq: `https://img.youtube.com/vi/${videoId}/mqdefault.jpg`,
-                    sd: `https://img.youtube.com/vi/${videoId}/sddefault.jpg`
-                };
-                
-                // Check if maxres thumbnail exists
-                checkThumbnailExists(thumbnails.maxres).then(exists => {
-                    if (!exists) {
-                        thumbnails.maxres = thumbnails.hq;
+                try {
+                    // Extract video ID from various YouTube URL formats
+                    let videoId = '';
+                    
+                    // Regular URL formats
+                    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
+                    const match = url.match(regExp);
+                    
+                    if (match && match[2].length === 11) {
+                        videoId = match[2];
+                    } 
+                    // Short URL format
+                    else if (url.includes('youtu.be/')) {
+                        videoId = url.split('youtu.be/')[1].split(/[?&#]/)[0];
+                    }
+                    // Channel URL with video ID
+                    else if (url.includes('youtube.com/watch')) {
+                        const urlParams = new URLSearchParams(url.split('?')[1]);
+                        videoId = urlParams.get('v');
+                    }
+                    // Embedded URL
+                    else if (url.includes('youtube.com/embed/')) {
+                        videoId = url.split('youtube.com/embed/')[1].split(/[?&#]/)[0];
                     }
                     
-                    // Set the preview image
-                    thumbnailPreview.src = thumbnails.maxres;
+                    if (!videoId) {
+                        throw new Error('Invalid YouTube URL');
+                    }
                     
-                    // Set download buttons data
-                    downloadBtns.forEach(btn => {
-                        const quality = btn.getAttribute('data-quality');
-                        btn.onclick = () => downloadThumbnail(thumbnails[quality], quality);
-                    });
-                    
-                    // Hide loading and show result with animation
-                    loading.style.display = 'none';
-                    setTimeout(() => {
-                        resultContainer.classList.add('show');
-                        // Smooth scroll to result
-                        resultContainer.scrollIntoView({ behavior: 'smooth' });
-                        // Clear input with animation
-                        youtubeUrlInput.value = '';
-                    }, 100);
-                });
-            }
-            
-            function checkThumbnailExists(url) {
-                return new Promise(resolve => {
-                    const img = new Image();
-                    img.onload = function() {
-                        resolve(true);
-                    };
-                    img.onerror = function() {
-                        resolve(false);
-                    };
-                    img.src = url;
-                });
-            }
-            
-            function downloadThumbnail(url, quality) {
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = `youtube-thumbnail-${quality}.jpg`;
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-            }
-        });
-    </script>
-</body>
-</html>
+                    // Define all possible thumbnail qualities with their dimensions
+                    const thumbnailQualities = [
+                        { 
+                            id: 'maxres', 
+                            name: 'Maximum Resolution', 
+                            url: `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`, 
+                            width: 1280, 
+                            height: 720,
+                            icon: '🖼️'
+                        },
+                        { 
+                            id: 'sd', 
+                            name: 'Standard Definition', 
+                            url: `https://img.youtube.com/vi/${videoId}/sddefault.jpg`, 
+                            width: 640, 
+                            height: 480,
+                            icon: '🖼️'
+                        },
+                        { 
+                            id: 'hq', 
+                            name: 'High Quality', 
+                  
