@@ -1,0 +1,957 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pritam YouTube Thumbnail Downloader</title>
+    <style>
+        :root {
+            --primary-color: #FF0000; /* YouTube Red */
+            --secondary-color: #282828; /* Dark Gray for secondary elements */
+            --text-color: #0F0F0F; /* Dark text for light mode */
+            --bg-color: #FFFFFF; /* White background like YouTube */
+            --card-color: #FFFFFF; /* Card background */
+            --input-bg: #F1F1F1; /* Light gray for input fields */
+            --border-color: #E5E5E5; /* Light gray borders */
+            --shadow-color: rgba(0, 0, 0, 0.1); /* Subtle shadow */
+            --success-color: #00AA00; /* Green for success */
+            --error-color: #CC0000; /* Darker red for errors */
+            --warning-color: #FF9900; /* Orange for warnings */
+        }
+
+        [data-theme="dark"] {
+            --primary-color: #FF0000; /* YouTube Red remains the same */
+            --secondary-color: #CCCCCC; /* Lighter gray for dark mode */
+            --text-color: #FFFFFF; /* White text for dark mode */
+            --bg-color: #0F0F0F; /* YouTube dark mode background */
+            --card-color: #1F1F1F; /* Slightly lighter dark for cards */
+            --input-bg: #282828; /* Dark input background */
+            --border-color: #3D3D3D; /* Dark gray borders */
+            --shadow-color: rgba(0, 0, 0, 0.3); /* Darker shadow */
+            --success-color: #00CC00; /* Brighter green for success */
+            --error-color: #FF3333; /* Brighter red for errors */
+            --warning-color: #FFAA33; /* Brighter orange for warnings */
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1), opacity 0.5s ease, box-shadow 0.3s ease;
+        }
+
+        body {
+            font-family: 'Roboto', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* YouTube uses Roboto */
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            position: relative;
+            padding-top: 50px;
+            animation: fadeInDown 0.8s ease both;
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        h1 {
+            color: var(--primary-color);
+            margin-bottom: 10px;
+            font-size: 2.8rem;
+            background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            animation: gradient 8s ease infinite, fadeIn 1s ease both;
+            background-size: 200% 200%;
+            letter-spacing: -1px;
+        }
+
+        @keyframes gradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .subtitle {
+            color: var(--text-color);
+            opacity: 0.8;
+            font-size: 1.2rem;
+            margin-bottom: 5px;
+            animation: fadeIn 1s ease 0.2s both;
+        }
+
+        .theme-toggle {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--text-color);
+            font-size: 1.8rem;
+            padding: 5px;
+            border-radius: 50%;
+            width: 45px;
+            height: 45px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+            animation: fadeIn 1s ease 0.4s both;
+            z-index: 10;
+        }
+
+        .theme-toggle:hover {
+            background-color: rgba(0, 0, 0, 0.1);
+            transform: scale(1.1);
+        }
+
+        [data-theme="dark"] .theme-toggle:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .input-container {
+            background-color: var(--card-color);
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 8px 25px var(--shadow-color);
+            margin-bottom: 30px;
+            transition: all 0.5s cubic-bezier(0.25, 0.8, 0.25, 1);
+            animation: fadeInUp 0.8s ease 0.3s both;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .input-container:hover {
+            transform: translateY(-5px) scale(1.01);
+            box-shadow: 0 15px 35px var(--shadow-color);
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        label {
+            margin-bottom: 12px;
+            font-weight: 600;
+            color: var(--text-color);
+            font-size: 1.2rem;
+        }
+
+        .url-input {
+            display: flex;
+            gap: 12px;
+        }
+
+        input[type="text"] {
+            flex: 1;
+            padding: 16px 20px;
+            border: 2px solid var(--border-color);
+            border-radius: 10px;
+            font-size: 1.1rem;
+            background-color: var(--input-bg);
+            color: var(--text-color);
+            transition: all 0.4s ease;
+        }
+
+        input[type="text"]:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 5px rgba(255, 0, 0, 0.2);
+        }
+
+        button {
+            padding: 16px 28px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1.1rem;
+            font-weight: 600;
+            transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+        }
+
+        button:hover {
+            background-color: #CC0000; /* Darker red on hover */
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 8px 15px var(--shadow-color);
+        }
+
+        button:active {
+            transform: translateY(0) scale(1);
+            box-shadow: 0 4px 8px var(--shadow-color);
+        }
+
+        .result-container {
+            background-color: var(--card-color);
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 8px 25px var(--shadow-color);
+            margin-bottom: 30px;
+            opacity: 0;
+            height: 0;
+            overflow: hidden;
+            transition: all 0.7s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+
+        .result-container.show {
+            opacity: 1;
+            height: auto;
+            padding: 30px;
+        }
+
+        .thumbnails-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 30px;
+            margin-bottom: 20px;
+        }
+
+        .thumbnail-card {
+            background-color: var(--card-color);
+            border-radius: 14px;
+            overflow: hidden;
+            box-shadow: 0 6px 18px var(--shadow-color);
+            transition: all 0.5s cubic-bezier(0.25, 0.8, 0.25, 1);
+            animation: cardEntrance 0.8s ease forwards;
+            opacity: 0;
+            transform: translateY(30px);
+        }
+
+        @keyframes cardEntrance {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .thumbnail-card:nth-child(1) { animation-delay: 0.1s; }
+        .thumbnail-card:nth-child(2) { animation-delay: 0.2s; }
+        .thumbnail-card:nth-child(3) { animation-delay: 0.3s; }
+        .thumbnail-card:nth-child(4) { animation-delay: 0.4s; }
+        .thumbnail-card:nth-child(5) { animation-delay: 0.5s; }
+
+        .thumbnail-card:hover {
+            transform: translateY(-10px) scale(1.02);
+            box-shadow: 0 18px 35px var(--shadow-color);
+        }
+
+        .thumbnail-img-container {
+            position: relative;
+            overflow: hidden;
+            padding-top: 56.25%; /* 16:9 aspect ratio */
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .thumbnail-img {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.8s ease;
+        }
+
+        .thumbnail-card:hover .thumbnail-img {
+            transform: scale(1.1);
+        }
+
+        .thumbnail-info {
+            padding: 20px;
+        }
+
+        .thumbnail-quality {
+            font-weight: 700;
+            margin-bottom: 10px;
+            color: var(--primary-color);
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .quality-icon {
+            font-size: 1.4rem;
+        }
+
+        .thumbnail-dimensions {
+            font-size: 0.95rem;
+            opacity: 0.8;
+            margin-bottom: 14px;
+        }
+
+        .thumbnail-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .thumbnail-download-btn {
+            background-color: var(--primary-color);
+            padding: 12px 20px;
+            font-size: 1rem;
+            border-radius: 10px;
+            font-weight: 600;
+        }
+
+        .thumbnail-download-btn:hover {
+            background-color: #CC0000; /* Darker red */
+        }
+
+        .thumbnail-copy-btn {
+            background-color: var(--secondary-color);
+            padding: 12px 20px;
+            font-size: 1rem;
+            border-radius: 10px;
+            font-weight: 600;
+        }
+
+        .thumbnail-copy-btn:hover {
+            background-color: #1A1A1A; /* Darker gray for light mode */
+        }
+
+        [data-theme="dark"] .thumbnail-copy-btn:hover {
+            background-color: #AAAAAA; /* Lighter gray for dark mode */
+        }
+
+        .thumbnail-status {
+            font-size: 0.9rem;
+            padding: 6px 12px;
+            border-radius: 14px;
+            font-weight: 600;
+        }
+
+        .status-available {
+            background-color: rgba(0, 170, 0, 0.2);
+            color: var(--success-color);
+        }
+
+        .status-unavailable {
+            background-color: rgba(204, 0, 0, 0.2);
+            color: var(--error-color);
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            margin: 40px 0;
+            animation: fadeIn 0.6s ease;
+        }
+
+        .spinner {
+            border: 6px solid rgba(0, 0, 0, 0.1);
+            border-radius: 50%;
+            border-top: 6px solid var(--primary-color);
+            width: 60px;
+            height: 60px;
+            animation: spin 1.2s linear infinite;
+            margin: 0 auto 25px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            font-size: 1.3rem;
+            color: var(--text-color);
+            animation: pulse 1.6s ease infinite;
+            font-weight: 500;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.8; transform: scale(0.98); }
+            50% { opacity: 1; transform: scale(1.02); }
+        }
+
+        footer {
+            margin-top: auto;
+            text-align: center;
+            padding: 25px;
+            color: var(--text-color);
+            opacity: 0.7;
+            font-size: 1rem;
+            animation: fadeIn 1.2s ease;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%) translateY(120px);
+            background-color: var(--success-color);
+            color: white;
+            padding: 18px 28px;
+            border-radius: 10px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.25);
+            z-index: 1000;
+            opacity: 0;
+            transition: all 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 1.1rem;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        .toast.error {
+            background-color: var(--error-color);
+        }
+
+        .toast.warning {
+            background-color: var(--warning-color);
+        }
+
+        .toast-icon {
+            font-size: 1.4rem;
+        }
+
+        /* Hidden textarea for fallback copy mechanism */
+        #clipboardFallback {
+            position: absolute;
+            left: -9999px;
+            top: -9999px;
+            opacity: 0;
+        }
+
+        /* Modal for manual copy fallback */
+        .copy-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1001;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .copy-modal.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .copy-modal-content {
+            background-color: var(--card-color);
+            padding: 25px;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px var(--shadow-color);
+            max-width: 500px;
+            width: 90%;
+            text-align: center;
+        }
+
+        .copy-modal-content h3 {
+            color: var(--primary-color);
+            margin-bottom: 15px;
+            font-size: 1.5rem;
+        }
+
+        .copy-modal-content input {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 15px;
+            border: 2px solid var(--border-color);
+            border-radius: 10px;
+            font-size: 1rem;
+            background-color: var(--input-bg);
+            color: var(--text-color);
+        }
+
+        .copy-modal-content input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+
+        .copy-modal-content button {
+            background-color: var(--primary-color);
+            padding: 12px 25px;
+            font-size: 1rem;
+        }
+
+        .copy-modal-content button:hover {
+            background-color: #CC0000;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+            
+            h1 {
+                font-size: 2.2rem;
+            }
+            
+            .subtitle {
+                font-size: 1rem;
+            }
+            
+            .url-input {
+                flex-direction: column;
+            }
+            
+            button {
+                width: 100%;
+                padding: 14px;
+            }
+            
+            .thumbnails-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            
+            .input-container {
+                padding: 20px;
+            }
+            
+            .thumbnail-card {
+                max-width: 400px;
+                margin: 0 auto;
+            }
+            
+            .toast {
+                width: 90%;
+                text-align: center;
+                padding: 15px;
+            }
+
+            .theme-toggle {
+                top: 10px;
+                right: 10px;
+            }
+
+            .thumbnail-actions {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 10px;
+            }
+            
+            .thumbnail-download-btn, .thumbnail-copy-btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Pritam YouTube Thumbnail Downloader</h1>
+            <p class="subtitle">Download high-quality Thumbnails from any YouTube Video</p>
+            <button class="theme-toggle" id="themeToggle">🌓</button>
+        </header>
+
+        <div class="input-container">
+            <div class="input-group">
+                <label for="youtubeUrl">YouTube Video URL</label>
+                <div class="url-input">
+                    <input type="text" id="youtubeUrl" placeholder="https://www.youtube.com/watch?v=..." autocomplete="off">
+                    <button id="fetchBtn">
+                        <span>Fetch Thumbnails</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p class="loading-text">Fetching thumbnails...</p>
+        </div>
+
+        <div class="result-container" id="resultContainer">
+            <div class="thumbnails-grid" id="thumbnailsGrid">
+                <!-- Thumbnail cards will be inserted here -->
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p>© 2025 Pritam YouTube Thumbnail Downloader. All rights reserved.</p>
+    </footer>
+
+    <div class="toast" id="toast">
+        <span class="toast-icon">✓</span>
+        <span class="toast-message"></span>
+    </div>
+
+    <!-- Hidden textarea for fallback copy mechanism -->
+    <textarea id="clipboardFallback" readonly></textarea>
+
+    <!-- Modal for manual copy when clipboard fails -->
+    <div class="copy-modal" id="copyModal">
+        <div class="copy-modal-content">
+            <h3>Copy URL Manually</h3>
+            <input type="text" id="manualCopyInput" readonly>
+            <p style="margin-bottom: 15px; font-size: 0.9rem; color: var(--text-color); opacity: 0.8;">Select the URL above and press Ctrl+C to copy.</p>
+            <button id="closeModalBtn">Close</button>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Theme toggle functionality
+            const themeToggle = document.getElementById('themeToggle');
+            const body = document.body;
+            
+            // Check for saved theme preference or use preferred color scheme
+            const savedTheme = localStorage.getItem('theme');
+            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            
+            if (savedTheme) {
+                body.setAttribute('data-theme', savedTheme);
+                themeToggle.textContent = savedTheme === 'dark' ? '🌞' : '🌓';
+            } else if (prefersDark) {
+                body.setAttribute('data-theme', 'dark');
+                themeToggle.textContent = '🌞';
+            }
+            
+            themeToggle.addEventListener('click', () => {
+                const currentTheme = body.getAttribute('data-theme');
+                const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+                body.setAttribute('data-theme', newTheme);
+                themeToggle.textContent = newTheme === 'dark' ? '🌞' : '🌓';
+                localStorage.setItem('theme', newTheme);
+            });
+
+            // Thumbnail downloader functionality
+            const fetchBtn = document.getElementById('fetchBtn');
+            const youtubeUrlInput = document.getElementById('youtubeUrl');
+            const loading = document.getElementById('loading');
+            const resultContainer = document.getElementById('resultContainer');
+            const thumbnailsGrid = document.getElementById('thumbnailsGrid');
+            const toast = document.getElementById('toast');
+            const toastMessage = toast.querySelector('.toast-message');
+            const clipboardFallback = document.getElementById('clipboardFallback');
+            const copyModal = document.getElementById('copyModal');
+            const manualCopyInput = document.getElementById('manualCopyInput');
+            const closeModalBtn = document.getElementById('closeModalBtn');
+
+            fetchBtn.addEventListener('click', fetchThumbnails);
+            youtubeUrlInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    fetchThumbnails();
+                }
+            });
+            closeModalBtn.addEventListener('click', () => {
+                copyModal.classList.remove('show');
+            });
+
+            function showToast(message, isSuccess = true) {
+                toastMessage.textContent = message;
+                toast.className = isSuccess ? 'toast show' : 'toast show error';
+                toast.querySelector('.toast-icon').textContent = isSuccess ? '✓' : '✕';
+                
+                setTimeout(() => {
+                    toast.classList.remove('show');
+                }, 3000);
+            }
+
+            function copyToClipboard(url) {
+                try {
+                    // First, try using the Clipboard API if available and in secure context
+                    if (navigator.clipboard && location.protocol === 'https:') {
+                        navigator.clipboard.writeText(url)
+                            .then(() => {
+                                showToast('Thumbnail URL copied to clipboard!');
+                            })
+                            .catch(err => {
+                                console.error('Clipboard API failed:', err);
+                                fallbackCopy(url);
+                            });
+                    } else {
+                        // Fallback to textarea method if Clipboard API is not supported
+                        fallbackCopy(url);
+                    }
+                } catch (err) {
+                    console.error('Copy error:', err);
+                    fallbackCopy(url);
+                }
+            }
+
+            function fallbackCopy(url) {
+                try {
+                    // Use the hidden textarea to copy text
+                    clipboardFallback.value = url;
+                    clipboardFallback.select();
+                    const successful = document.execCommand('copy');
+                    if (successful) {
+                        showToast('Thumbnail URL copied to clipboard!');
+                    } else {
+                        showManualCopyModal(url);
+                    }
+                } catch (err) {
+                    console.error('Fallback copy failed:', err);
+                    showManualCopyModal(url);
+                }
+            }
+
+            function showManualCopyModal(url) {
+                manualCopyInput.value = url;
+                manualCopyInput.select();
+                copyModal.classList.add('show');
+                showToast('Failed to copy. Please select and copy manually.', false);
+            }
+
+            async function fetchThumbnails() {
+                const url = youtubeUrlInput.value.trim();
+                
+                if (!url) {
+                    showToast('Please enter a YouTube URL', false);
+                    youtubeUrlInput.focus();
+                    return;
+                }
+                
+                // Show loading state
+                loading.style.display = 'block';
+                resultContainer.classList.remove('show');
+                thumbnailsGrid.innerHTML = '';
+                
+                try {
+                    // Extract video ID from various YouTube URL formats
+                    let videoId = '';
+                    
+                    // Regular URL formats
+                    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
+                    const match = url.match(regExp);
+                    
+                    if (match && match[2].length === 11) {
+                        videoId = match[2];
+                    } 
+                    // Short URL format
+                    else if (url.includes('youtu.be/')) {
+                        videoId = url.split('youtu.be/')[1].split(/[?&#]/)[0];
+                    }
+                    // Channel URL with video ID
+                    else if (url.includes('youtube.com/watch')) {
+                        const urlParams = new URLSearchParams(url.split('?')[1]);
+                        videoId = urlParams.get('v');
+                    }
+                    // Embedded URL
+                    else if (url.includes('youtube.com/embed/')) {
+                        videoId = url.split('youtube.com/embed/')[1].split(/[?&#]/)[0];
+                    }
+                    
+                    if (!videoId) {
+                        throw new Error('Invalid YouTube URL');
+                    }
+                    
+                    // Define all possible thumbnail qualities with their dimensions
+                    const thumbnailQualities = [
+                        { 
+                            id: 'maxres', 
+                            name: 'Maximum Resolution', 
+                            url: `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`, 
+                            width: 1280, 
+                            height: 720,
+                            icon: '🖼️'
+                        },
+                        { 
+                            id: 'sd', 
+                            name: 'Standard Definition', 
+                            url: `https://img.youtube.com/vi/${videoId}/sddefault.jpg`, 
+                            width: 640, 
+                            height: 480,
+                            icon: '🖼️'
+                        },
+                        { 
+                            id: 'hq', 
+                            name: 'High Quality', 
+                            url: `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`, 
+                            width: 480, 
+                            height: 360,
+                            icon: '🌅'
+                        },
+                        { 
+                            id: 'mq', 
+                            name: 'Medium Quality', 
+                            url: `https://img.youtube.com/vi/${videoId}/mqdefault.jpg`, 
+                            width: 320, 
+                            height: 180,
+                            icon: '🏞️'
+                        },
+                        { 
+                            id: 'default', 
+                            name: 'Default Quality', 
+                            url: `https://img.youtube.com/vi/${videoId}/default.jpg`, 
+                            width: 120, 
+                            height: 90,
+                            icon: '📷'
+                        }
+                    ];
+                    
+                    let availableThumbnails = 0;
+                    
+                    // Check availability of each thumbnail and create cards only for available ones
+                    for (const quality of thumbnailQualities) {
+                        const exists = await checkThumbnailExists(quality.url);
+                        if (exists) {
+                            createThumbnailCard(quality, videoId);
+                            availableThumbnails++;
+                        }
+                    }
+
+                    // Hide loading and show results
+                    loading.style.display = 'none';
+                    resultContainer.classList.add('show');
+                    
+                    // Clear input field with animation
+                    setTimeout(() => {
+                        youtubeUrlInput.value = '';
+                        resultContainer.scrollIntoView({ behavior: 'smooth' });
+                    }, 300);
+
+                    if (availableThumbnails > 0) {
+                        showToast('Thumbnails fetched successfully!');
+                    } else {
+                        showToast('No thumbnails available for this video', false);
+                    }
+                    
+                } catch (error) {
+                    console.error('Error:', error);
+                    loading.style.display = 'none';
+                    showToast(error.message || 'Failed to fetch thumbnails', false);
+                }
+            }
+            
+            function createThumbnailCard(quality, videoId) {
+                const card = document.createElement('div');
+                card.className = 'thumbnail-card';
+                
+                card.innerHTML = `
+                    <div class="thumbnail-img-container">
+                        <img class="thumbnail-img" src="${quality.url}" alt="${quality.name} Thumbnail">
+                    </div>
+                    <div class="thumbnail-info">
+                        <div class="thumbnail-quality">
+                            <span class="quality-icon">${quality.icon}</span>
+                            ${quality.name}
+                        </div>
+                        <div class="thumbnail-dimensions">
+                            ${quality.width} × ${quality.height} pixels
+                        </div>
+                        <div class="thumbnail-actions">
+                            <button class="thumbnail-download-btn" data-quality="${quality.id}">
+                                <span>Download</span>
+                            </button>
+                            <button class="thumbnail-copy-btn" data-url="${quality.url}">
+                                <span>Copy URL</span>
+                            </button>
+                            <span class="thumbnail-status status-available">
+                                Available
+                            </span>
+                        </div>
+                    </div>
+                `;
+                
+                // Add click event for download button
+                const downloadBtn = card.querySelector('.thumbnail-download-btn');
+                downloadBtn.addEventListener('click', () => {
+                    downloadThumbnail(quality.url, quality.id, videoId);
+                });
+                
+                // Add click event for copy button
+                const copyBtn = card.querySelector('.thumbnail-copy-btn');
+                copyBtn.addEventListener('click', () => {
+                    copyToClipboard(quality.url);
+                });
+                
+                thumbnailsGrid.appendChild(card);
+            }
+            
+            async function downloadThumbnail(url, quality, videoId) {
+                try {
+                    // Fetch the image as a blob to trigger a direct download
+                    const response = await fetch(url, { mode: 'cors' });
+                    const blob = await response.blob();
+                    const downloadUrl = window.URL.createObjectURL(blob);
+                    
+                    const a = document.createElement('a');
+                    a.href = downloadUrl;
+                    a.download = `pritam-thumbnail-${quality}-${videoId}.jpg`;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    
+                    // Revoke the object URL to free memory
+                    window.URL.revokeObjectURL(downloadUrl);
+                    
+                    showToast(`Downloaded ${quality} thumbnail!`);
+                } catch (error) {
+                    console.error('Download failed:', error);
+                    showToast('Failed to download thumbnail', false);
+                }
+            }
+            
+            function checkThumbnailExists(url) {
+                return new Promise(resolve => {
+                    const img = new Image();
+                    img.onload = function() {
+                        // Check if the image is not the default YouTube placeholder
+                        if (this.width > 120 || this.height > 90) {
+                            resolve(true);
+                        } else {
+                            resolve(false);
+                        }
+                    };
+                    img.onerror = function() {
+                        resolve(false);
+                    };
+                    img.src = url;
+                });
+            }
+        });
+    </script>
+</body>
+</html>
