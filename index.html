@@ -1,0 +1,760 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Download high-quality thumbnails from any YouTube video with ease.">
+    <meta name="author" content="Pritam">
+    <title>Pritam YouTube Thumbnail Downloader</title>
+    <style>
+        /* Theme Variables */
+        :root {
+            --primary-color: #E63946; /* Coral Red for vibrant accents */
+            --secondary-color: #457B9D; /* Muted Blue for contrast */
+            --text-color: #1D3557; /* Dark Navy for text */
+            --bg-color: #F1FAEE; /* Light Off-White background */
+            --card-bg: #FFFFFF; /* Clean White for cards */
+            --input-bg: #F5F5F5; /* Subtle Gray for inputs */
+            --border-color: #DCDCDC; /* Light Border */
+            --shadow-color: rgba(29, 53, 87, 0.15); /* Soft shadow */
+            --success-color: #2B9348; /* Fresh Green for success */
+            --error-color: #D00000; /* Bold Red for errors */
+            --warning-color: #FFB085; /* Soft Orange for warnings */
+        }
+
+        [data-theme="dark"] {
+            --primary-color: #E63946;
+            --secondary-color: #A8DADC;
+            --text-color: #F1FAEE;
+            --bg-color: #1D3557;
+            --card-bg: #2C4F77;
+            --input-bg: #3A5A81;
+            --border-color: #4A6FA5;
+            --shadow-color: rgba(0, 0, 0, 0.4);
+            --success-color: #55A630;
+            --error-color: #FF3333;
+            --warning-color: #FF9F1C;
+        }
+
+        /* Base Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+        }
+
+        body {
+            font-family: 'Inter', 'Helvetica Neue', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 1.5rem;
+            overflow-x: hidden;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 75rem;
+            margin: 0 auto;
+            padding: 1.5rem;
+        }
+
+        /* Header Styles */
+        header {
+            text-align: center;
+            margin-bottom: 2rem;
+            padding-top: 1rem;
+            opacity: 0;
+            animation: slideDown 0.8s ease-out 0.2s forwards;
+            width: 100%;
+        }
+
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-1.5rem); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        h1 {
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
+            font-size: 2.5rem;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            position: relative;
+            display: inline-block;
+        }
+
+        h1::after {
+            content: '';
+            position: absolute;
+            bottom: -0.3rem;
+            left: 0;
+            width: 100%;
+            height: 0.2rem;
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+            animation: underlineGrow 1.5s ease-in-out infinite;
+        }
+
+        @keyframes underlineGrow {
+            0%, 100% { transform: scaleX(0.8); }
+            50% { transform: scaleX(1); }
+        }
+
+        .subtitle {
+            color: var(--text-color);
+            opacity: 0.85;
+            font-size: 1.1rem;
+            margin-bottom: 1.5rem;
+            font-weight: 400;
+            animation: fadeIn 1s ease-out 0.5s forwards;
+            opacity: 0;
+        }
+
+        @keyframes fadeIn {
+            to { opacity: 0.85; }
+        }
+
+        /* Header Actions */
+        .header-actions {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .theme-toggle {
+            background: transparent;
+            border: 2px solid var(--border-color);
+            cursor: pointer;
+            color: var(--text-color);
+            font-size: 1.4rem;
+            padding: 0.4rem;
+            border-radius: 0.5rem;
+            width: 2.5rem;
+            height: 2.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: popIn 0.6s ease-out 0.7s forwards;
+            opacity: 0;
+        }
+
+        @keyframes popIn {
+            from { opacity: 0; transform: scale(0.8); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .theme-toggle:hover {
+            background-color: var(--primary-color);
+            color: white;
+            transform: scale(1.05);
+        }
+
+        .telegram-btn {
+            background-color: var(--secondary-color);
+            color: white;
+            border: none;
+            cursor: pointer;
+            padding: 0.6rem 1.2rem;
+            border-radius: 0.5rem;
+            font-size: 1rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            text-decoration: none;
+            min-width: 9rem;
+            animation: slideRight 0.8s ease-out 0.9s forwards;
+            opacity: 0;
+            transform: translateX(-1rem);
+        }
+
+        @keyframes slideRight {
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .telegram-btn:hover {
+            background-color: var(--primary-color);
+            transform: translateY(-0.2rem);
+            box-shadow: 0 0.4rem 0.8rem var(--shadow-color);
+        }
+
+        .telegram-icon {
+            font-size: 1.3rem;
+        }
+
+        /* Input Container */
+        .input-container {
+            background-color: var(--card-bg);
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            box-shadow: 0 0.3rem 1rem var(--shadow-color);
+            margin-bottom: 2rem;
+            opacity: 0;
+            transform: translateY(1.5rem);
+            animation: slideUp 0.7s ease-out 0.4s forwards;
+        }
+
+        @keyframes slideUp {
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .input-container:hover {
+            box-shadow: 0 0.5rem 1.5rem var(--shadow-color);
+            transform: translateY(-0.2rem);
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        label {
+            margin-bottom: 0.6rem;
+            font-weight: 600;
+            color: var(--text-color);
+            font-size: 1.1rem;
+        }
+
+        .url-input {
+            display: flex;
+            gap: 0.8rem;
+        }
+
+        input[type="text"] {
+            flex: 1;
+            padding: 0.9rem 1.2rem;
+            border: 1px solid var(--border-color);
+            border-radius: 0.5rem;
+            font-size: 1rem;
+            background-color: var(--input-bg);
+            color: var(--text-color);
+        }
+
+        input[type="text"]:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.2rem rgba(230, 57, 70, 0.2);
+        }
+
+        button {
+            padding: 0.9rem 1.5rem;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.6rem;
+        }
+
+        button:hover {
+            background-color: #C62C3A;
+            transform: translateY(-0.2rem);
+            box-shadow: 0 0.4rem 0.8rem var(--shadow-color);
+        }
+
+        button:active {
+            transform: translateY(0.1rem);
+            transition: transform 0.1s ease;
+        }
+
+        /* Result Container */
+        .result-container {
+            background-color: var(--card-bg);
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            box-shadow: 0 0.3rem 1rem var(--shadow-color);
+            margin-bottom: 2rem;
+            opacity: 0;
+            max-height: 0;
+            overflow: hidden;
+            transition: opacity 0.6s ease-out, max-height 0.6s ease-out;
+        }
+
+        .result-container.show {
+            opacity: 1;
+            max-height: 120rem;
+        }
+
+        .thumbnails-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        /* Thumbnail Card */
+        .thumbnail-card {
+            background-color: var(--card-bg);
+            border-radius: 0.6rem;
+            overflow: hidden;
+            box-shadow: 0 0.2rem 0.8rem var(--shadow-color);
+            opacity: 0;
+            transform: translateY(1.2rem);
+            animation: cardFadeIn 0.6s ease-out forwards;
+            display: flex;
+            flex-direction: column;
+        }
+
+        @keyframes cardFadeIn {
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .thumbnail-card:nth-child(1) { animation-delay: 0.1s; }
+        .thumbnail-card:nth-child(2) { animation-delay: 0.2s; }
+        .thumbnail-card:nth-child(3) { animation-delay: 0.3s; }
+        .thumbnail-card:nth-child(4) { animation-delay: 0.4s; }
+        .thumbnail-card:nth-child(5) { animation-delay: 0.5s; }
+
+        .thumbnail-card:hover {
+            transform: translateY(-0.3rem);
+            box-shadow: 0 0.6rem 1.2rem var(--shadow-color);
+        }
+
+        .thumbnail-img-container {
+            position: relative;
+            overflow: hidden;
+            padding-top: 56.25%; /* 16:9 aspect ratio */
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .thumbnail-img {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+
+        .thumbnail-card:hover .thumbnail-img {
+            transform: scale(1.03);
+        }
+
+        .thumbnail-info {
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+        }
+
+        .thumbnail-quality {
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: var(--primary-color);
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .thumbnail-dimensions, .thumbnail-filesize {
+            font-size: 0.9rem;
+            opacity: 0.75;
+            margin-bottom: 0.4rem;
+            font-weight: 400;
+            color: var(--text-color);
+        }
+
+        .thumbnail-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 0.5rem;
+            margin-top: auto;
+        }
+
+        .thumbnail-download-btn, .thumbnail-copy-btn {
+            padding: 0.6rem 1rem;
+            font-size: 0.9rem;
+            border-radius: 0.4rem;
+            font-weight: 600;
+            flex: 1;
+        }
+
+        .thumbnail-download-btn {
+            background-color: var(--primary-color);
+        }
+
+        .thumbnail-copy-btn {
+            background-color: var(--secondary-color);
+            color: white;
+        }
+
+        /* Loading and Toast */
+        .loading {
+            display: none;
+            text-align: center;
+            margin: 2rem 0;
+            opacity: 0;
+            animation: fadeIn 0.5s ease-out forwards;
+        }
+
+        .spinner {
+            border: 0.3rem solid rgba(29, 53, 87, 0.2);
+            border-radius: 50%;
+            border-top: 0.3rem solid var(--primary-color);
+            width: 3rem;
+            height: 3rem;
+            animation: spin 1s ease infinite;
+            margin: 0 auto 1rem;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            font-size: 1.1rem;
+            color: var(--text-color);
+            animation: textPulse 1.5s ease infinite;
+            font-weight: 500;
+        }
+
+        @keyframes textPulse {
+            0%, 100% { opacity: 0.6; }
+            50% { opacity: 1; }
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%) translateY(3rem);
+            background-color: var(--success-color);
+            color: white;
+            padding: 0.9rem 1.5rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 0.4rem 1rem rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+            opacity: 0;
+            transition: all 0.4s ease-out;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            font-size: 1rem;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        .toast.error {
+            background-color: var(--error-color);
+        }
+
+        /* Footer */
+        footer {
+            margin-top: auto;
+            text-align: center;
+            padding: 1.5rem;
+            color: var(--text-color);
+            font-size: 0.9rem;
+            opacity: 0;
+            animation: fadeIn 1.2s ease-out 1.2s forwards;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 48rem) {
+            h1 { font-size: 2rem; }
+            .url-input { flex-direction: column; }
+            button { width: 100%; padding: 0.8rem; }
+            .thumbnails-grid { grid-template-columns: 1fr; gap: 1.2rem; }
+            .input-container { padding: 1.2rem; }
+            .thumbnail-actions { flex-direction: column; align-items: stretch; gap: 0.5rem; }
+            .thumbnail-download-btn, .thumbnail-copy-btn { width: 100%; }
+            .header-actions { gap: 0.6rem; }
+            .telegram-btn { font-size: 0.9rem; padding: 0.5rem 1rem; min-width: 7rem; }
+            .theme-toggle { font-size: 1.2rem; width: 2.2rem; height: 2.2rem; }
+        }
+
+        @media (max-width: 30rem) {
+            .header-actions { flex-direction: column; gap: 0.5rem; }
+            .telegram-btn { margin-top: 0.4rem; }
+            h1 { font-size: 1.8rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Pritam YouTube Thumbnail Downloader</h1>
+            <p class="subtitle">Grab high-quality thumbnails from any YouTube video instantly</p>
+            <div class="header-actions">
+                <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark/light mode">🌓</button>
+                <a href="https://t.me/PritamThumbnail_bot" class="telegram-btn" target="_blank" aria-label="Telegram Bot">
+                    <span class="telegram-icon">✈️</span>
+                    <span>Telegram Bot</span>
+                </a>
+            </div>
+        </header>
+
+        <div class="input-container">
+            <div class="input-group">
+                <label for="youtubeUrl">Enter YouTube Video URL</label>
+                <div class="url-input">
+                    <input type="text" id="youtubeUrl" placeholder="https://www.youtube.com/watch?v=..." autocomplete="off" aria-label="YouTube Video URL">
+                    <button id="fetchBtn" aria-label="Fetch Thumbnails">Get Thumbnails</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p class="loading-text">Loading thumbnails...</p>
+        </div>
+
+        <div class="result-container" id="resultContainer">
+            <div class="thumbnails-grid" id="thumbnailsGrid"></div>
+        </div>
+    </div>
+
+    <footer>
+        <p>&copy; 2025 Pritam YouTube Thumbnail Downloader. All rights reserved.</p>
+    </footer>
+
+    <div class="toast" id="toast">
+        <span class="toast-icon">✓</span>
+        <span class="toast-message"></span>
+    </div>
+
+    <script>
+        /**
+         * Pritam YouTube Thumbnail Downloader
+         * A utility to fetch and download YouTube video thumbnails.
+         * @author Pritam
+         */
+        const ThumbnailDownloader = {
+            elements: {
+                themeToggle: document.getElementById('themeToggle'),
+                fetchBtn: document.getElementById('fetchBtn'),
+                youtubeUrlInput: document.getElementById('youtubeUrl'),
+                loading: document.getElementById('loading'),
+                resultContainer: document.getElementById('resultContainer'),
+                thumbnailsGrid: document.getElementById('thumbnailsGrid'),
+                toast: document.getElementById('toast'),
+                toastMessage: document.getElementById('toast').querySelector('.toast-message')
+            },
+
+            init() {
+                this.setupTheme();
+                this.setupEventListeners();
+            },
+
+            setupTheme() {
+                const savedTheme = localStorage.getItem('theme');
+                const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                const initialTheme = savedTheme || (prefersDark ? 'dark' : 'light');
+                document.body.setAttribute('data-theme', initialTheme);
+                this.elements.themeToggle.textContent = initialTheme === 'dark' ? '☀️' : '🌙';
+            },
+
+            setupEventListeners() {
+                this.elements.themeToggle.addEventListener('click', () => this.toggleTheme());
+                this.elements.fetchBtn.addEventListener('click', () => this.fetchThumbnails());
+                this.elements.youtubeUrlInput.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') this.fetchThumbnails();
+                });
+            },
+
+            toggleTheme() {
+                const currentTheme = document.body.getAttribute('data-theme');
+                const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+                document.body.setAttribute('data-theme', newTheme);
+                this.elements.themeToggle.textContent = newTheme === 'dark' ? '☀️' : '🌙';
+                localStorage.setItem('theme', newTheme);
+            },
+
+            showToast(message, isSuccess = true) {
+                this.elements.toastMessage.textContent = message;
+                this.elements.toast.className = isSuccess ? 'toast show' : 'toast show error';
+                this.elements.toast.querySelector('.toast-icon').textContent = isSuccess ? '✓' : '✕';
+                setTimeout(() => this.elements.toast.classList.remove('show'), 3000);
+            },
+
+            async fetchThumbnails() {
+                const url = this.elements.youtubeUrlInput.value.trim();
+                if (!url) {
+                    this.showToast('Please enter a YouTube URL', false);
+                    this.elements.youtubeUrlInput.focus();
+                    return;
+                }
+
+                this.elements.loading.style.display = 'block';
+                this.elements.resultContainer.classList.remove('show');
+                this.elements.thumbnailsGrid.innerHTML = '';
+
+                try {
+                    const videoId = this.extractVideoId(url);
+                    if (!videoId) throw new Error('Invalid YouTube URL');
+
+                    const thumbnails = this.getThumbnailQualities(videoId);
+                    let availableThumbnails = 0;
+
+                    for (const thumbnail of thumbnails) {
+                        const thumbnailData = await this.checkThumbnailExists(thumbnail.url);
+                        if (thumbnailData.exists) {
+                            thumbnail.fileSize = thumbnailData.fileSize;
+                            this.createThumbnailCard(thumbnail, videoId);
+                            availableThumbnails++;
+                        }
+                    }
+
+                    this.elements.loading.style.display = 'none';
+                    this.elements.resultContainer.classList.add('show');
+                    this.elements.youtubeUrlInput.value = '';
+                    setTimeout(() => {
+                        this.elements.resultContainer.scrollIntoView({ behavior: 'smooth' });
+                    }, 300);
+
+                    this.showToast(availableThumbnails > 0
+                        ? 'Thumbnails fetched successfully!'
+                        : 'No thumbnails available for this video', availableThumbnails > 0);
+                } catch (error) {
+                    console.error('Error fetching thumbnails:', error);
+                    this.elements.loading.style.display = 'none';
+                    this.showToast(error.message || 'Failed to fetch thumbnails', false);
+                }
+            },
+
+            extractVideoId(url) {
+                try {
+                    // Regular expression for common YouTube URL patterns
+                    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=|shorts\/)([^#&?]*).*/;
+                    const match = url.match(regExp);
+                    if (match && match[2].length === 11) return match[2];
+
+                    // Handle different URL formats explicitly
+                    if (url.includes('youtu.be/')) return url.split('youtu.be/')[1].split(/[?&#]/)[0];
+                    if (url.includes('youtube.com/watch')) return new URLSearchParams(url.split('?')[1]).get('v');
+                    if (url.includes('youtube.com/embed/')) return url.split('youtube.com/embed/')[1].split(/[?&#]/)[0];
+                    if (url.includes('youtube.com/shorts/')) return url.split('youtube.com/shorts/')[1].split(/[?&#]/)[0];
+                    if (url.includes('youtube.com/live/')) return url.split('youtube.com/live/')[1].split(/[?&#]/)[0];
+                    if (url.includes('youtube.com/v/')) return url.split('youtube.com/v/')[1].split(/[?&#]/)[0];
+                    
+                    return null;
+                } catch (error) {
+                    console.error('Error extracting video ID:', error);
+                    return null;
+                }
+            },
+
+            getThumbnailQualities(videoId) {
+                return [
+                    { id: 'maxres', name: 'Max Resolution', url: `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`, width: 1280, height: 720, icon: '🔥', fileSize: 0 },
+                    { id: 'sd', name: 'Standard Def', url: `https://img.youtube.com/vi/${videoId}/sddefault.jpg`, width: 640, height: 480, icon: '🖥️', fileSize: 0 },
+                    { id: 'hq', name: 'High Quality', url: `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`, width: 480, height: 360, icon: '📸', fileSize: 0 },
+                    { id: 'mq', name: 'Medium Quality', url: `https://img.youtube.com/vi/${videoId}/mqdefault.jpg`, width: 320, height: 180, icon: '🖼️', fileSize: 0 },
+                    { id: 'default', name: 'Default', url: `https://img.youtube.com/vi/${videoId}/default.jpg`, width: 120, height: 90, icon: '📷', fileSize: 0 }
+                ];
+            },
+
+            createThumbnailCard(quality, videoId) {
+                const card = document.createElement('div');
+                card.className = 'thumbnail-card';
+                card.innerHTML = `
+                    <div class="thumbnail-img-container">
+                        <img class="thumbnail-img" src="${quality.url}" alt="${quality.name} Thumbnail">
+                    </div>
+                    <div class="thumbnail-info">
+                        <div class="thumbnail-quality">
+                            <span class="quality-icon">${quality.icon}</span>
+                            ${quality.name}
+                        </div>
+                        <div class="thumbnail-dimensions">
+                            ${quality.width} × ${quality.height} px
+                        </div>
+                        <div class="thumbnail-filesize">
+                            Size: ${this.formatFileSize(quality.fileSize)}
+                        </div>
+                        <div class="thumbnail-actions">
+                            <button class="thumbnail-download-btn" data-quality="${quality.id}">Download</button>
+                            <button class="thumbnail-copy-btn" data-url="${quality.url}">Copy URL</button>
+                        </div>
+                    </div>
+                `;
+
+                card.querySelector('.thumbnail-download-btn').addEventListener('click', () => this.downloadThumbnail(quality.url, quality.id, videoId));
+                card.querySelector('.thumbnail-copy-btn').addEventListener('click', () => this.copyToClipboard(quality.url));
+                this.elements.thumbnailsGrid.appendChild(card);
+            },
+
+            formatFileSize(bytes) {
+                if (bytes < 1024) return bytes + ' B';
+                if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
+                return (bytes / 1048576).toFixed(1) + ' MB';
+            },
+
+            copyToClipboard(url) {
+                navigator.clipboard?.writeText(url)
+                    .then(() => this.showToast('Thumbnail URL copied to clipboard!'))
+                    .catch(() => {
+                        const textarea = document.createElement('textarea');
+                        textarea.value = url;
+                        document.body.appendChild(textarea);
+                        textarea.select();
+                        document.execCommand('copy');
+                        document.body.removeChild(textarea);
+                        this.showToast('Thumbnail URL copied to clipboard!');
+                    });
+            },
+
+            async downloadThumbnail(url, quality, videoId) {
+                try {
+                    const response = await fetch(url, { mode: 'cors' });
+                    const blob = await response.blob();
+                    const downloadUrl = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = downloadUrl;
+                    a.download = `pritam-thumbnail-${quality}-${videoId}.jpg`;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    window.URL.revokeObjectURL(downloadUrl);
+                    this.showToast(`Downloaded ${quality} thumbnail!`);
+                } catch (error) {
+                    console.error('Download failed:', error);
+                    this.showToast('Failed to download thumbnail', false);
+                }
+            },
+
+            async checkThumbnailExists(url) {
+                try {
+                    const imgCheck = await new Promise((resolve) => {
+                        const img = new Image();
+                        img.onload = () => resolve(img.width > 120 || img.height > 90);
+                        img.onerror = () => resolve(false);
+                        img.src = url;
+                    });
+
+                    if (!imgCheck) return { exists: false, fileSize: 0 };
+
+                    const response = await fetch(url, { mode: 'cors' });
+                    const blob = await response.blob();
+                    return { exists: true, fileSize: blob.size };
+                } catch (error) {
+                    console.error('Error checking thumbnail:', error);
+                    return { exists: false, fileSize: 0 };
+                }
+            }
+        };
+
+        document.addEventListener('DOMContentLoaded', () => ThumbnailDownloader.init());
+    </script>
+</body>
+</html>
